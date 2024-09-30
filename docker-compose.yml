@@ -1,11 +1,21 @@
 services:
   db:
     image: postgres:15.5
+    restart: always
     environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      # Generally speaking postgres recommends the explicit usage of password/user 
+      # instead of trusting all connections 
+      - POSTGRES_PASSWORD=password
+      # I defined a database `app` for postgres to create I think the connection will fail without this
+      # since the connection url is targetting a non-existant database before this change.
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
       - PGDATA=/var/lib/postgresql/data/pgdata
     ports:
-      - 5432:5432
+      - "5432:5432"
+    expose:
+    # expose will prepare the containers to start listening/sending on this port
+      - 5432
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
   mail:
@@ -17,7 +27,9 @@ services:
     build: .
     command: bash -l -c "npm install && npm run start:dev"
     environment:
-      - DATABASE_URL=postgresql://postgres@db/app
+      # the url below connects to the db without ssl but using a password/user which 
+      # is usually the pattern for the local dev/container connections
+      - DATABASE_URL=postgres://postgres:password@db/app?sslmode=disable
       - SMTP_HOST=mail
       - SMTP_PORT=1025
       - SMTP_USER=
