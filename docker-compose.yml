@@ -23,6 +23,14 @@ services:
     ports:
       - 1025:1025
       - 1080:1080
+
+  # Wait for RabbitMQ to be joinable.
+  check-postgres-started: 
+    image: jwilder/dockerize:0.6.1
+    depends_on:
+      - db
+    command: 'dockerize -wait=tcp://db:5432'
+  
   server:
     build: .
     command: bash -l -c "npm install && npm run start:dev"
@@ -40,6 +48,7 @@ services:
       - 5555:5555 # prisma
       - 6006:6006 # storybook
     depends_on:
+      - check-postgres-started
       - db
       - mail
     volumes:
