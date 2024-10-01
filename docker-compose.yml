@@ -25,7 +25,7 @@ services:
       - 1025:1025
       - 1080:1080
 
-  # Wait for RabbitMQ to be joinable.
+  # Wait for postgres to be joinable.
   check-postgres-started: 
     image: jwilder/dockerize:0.6.1
     depends_on:
